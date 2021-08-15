@@ -1,2 +1,0 @@
-run = "python -B -m soar" # -B eliminates bytecode like pycache
-language = "bash"

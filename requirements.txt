@@ -1,4 +1,0 @@
-sanic
-jinja2
-motor
-dnspython

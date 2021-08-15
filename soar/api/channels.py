@@ -8,6 +8,7 @@ from . import snowflakes
 
 server = None
 
+
 def setup(app):
     global server
     server = app
