@@ -15,10 +15,6 @@ def init(sanic, loop):
     app.ctx.dbclient = db.client
     app.ctx.db = db.db
 
-    app.ctx.users = db.users
-    app.ctx.channels = db.channels
-    app.ctx.messages = db.messages
-
 
 app.websocket_enabled = True
 

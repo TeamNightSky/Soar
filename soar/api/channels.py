@@ -2,49 +2,43 @@ from sanic import response, Blueprint
 import asyncio
 import datetime
 import hashlib
-from . import middleware
-from . import snowflakes
+
+from .middleware import Middleware
+from .snowflakes import channel_snowflake
 
 
-server = None
+class Channels:
+    def __init__(self, app):
+        self.app = app
 
+        bp = Blueprint("channelsapi", url_prefix="/api/channels")
+        bp.middleware(middleware.check_auth, "request")
 
-def setup(app):
-    global server
-    server = app
+        bp.add_route(create, "/create")
+        app.blueprint(bp)
 
-    bp = Blueprint("channelsapi", url_prefix="/api/channels")
-    bp.middleware(middleware.channels, "request")
+    async def create(self, request):
+        data = request.json
 
-    bp.add_route(create, "/create")
+        if data["scope"] in ["dm", "private"]:
+            if "members" not in data:
+                return json({"error": "members not provided"})
 
-    app.blueprint(bp)
+        date = datetime.datetime()
 
+        channel = {
+            "name": data["name"],
+            "scope": data["scope"],
+            "public": data["public"],
+            "members": [] if data.get("members") is None else data["members"],
+            "creator": request.ctx.auth,
+            "attrs": {},
+            "created-at": date,
+            "message-tag": channel_snowflake(data["name"], request.ctx.auth, date),
+            "parent": None,
+            "roles": {}
+        }
 
-async def create(request):
-    data = request.json
+        await self.app.ctx.db["channels"].insert_one({**channel})
 
-    attrs = {}
-
-    if data["scope"] in ["dm", "private"]:
-        if "members" not in data:
-            return json({"error": "members not provided"})
-
-    date = datetime.datetime()
-
-    channel = {
-        "name": data["name"],
-        "scope": data["scope"],
-        "public": data["public"],
-        "members": [] if data.get("members") is None else data["members"],
-        "creator": request.ctx.auth,
-        "attrs": attrs,
-        "created-at": date,
-        "message-tag": snowflakes.channel(data["name"], request.ctx.auth, date),
-        "parent": None,
-        "roles": {}
-    }
-
-    await server.ctx.channels.insert_one({**channel})
-
-    return response.json(channel)
+        return response.json(channel)
