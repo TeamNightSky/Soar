@@ -1,4 +1,5 @@
 from sanic import response, Blueprint
+from sanic_limiter import Limiter, get_remote_address
 import asyncio
 import hashlib
 import time
@@ -12,12 +13,12 @@ class Auth:
         self.setup()
 
     def setup(self):
-        bp = Blueprint("authapi", url_prefix="/api/auth")
+        bp = Blueprint(name="authapi", url_prefix="/api/auth")
 
         bp.middleware(self.middleware.check_auth, 'request')
 
-        bp.add_route(register, '/register')
-        bp.add_route(login, '/login')
+        bp.add_route(self.register, '/register')
+        bp.add_route(self.login, '/login')
 
         self.app.blueprint(bp)
 
@@ -47,7 +48,8 @@ class Auth:
 
         await asyncio.sleep(0.1)
 
-        if hashlib.sha256(data["pw"].encode("utf-8")).hexdigest() != (await users.find_one({"username": data["un"]}))["password"]:
+        dig = hashlib.sha256(data["pw"].encode("utf-8")).hexdigest()
+        if dig != (await users.find_one({"username": data["un"]}))["password"]:
             return response.json({"error": "incorrect password"})
 
         request.ctx.auth = data["un"]

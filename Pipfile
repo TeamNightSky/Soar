@@ -4,9 +4,18 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+sanic = "*"
+jinja2 = "*"
+motor = "*"
+dnspython = "*"
+toml = "*"
+pyngrok = "*"
 sphinx = "*"
+sanic_limiter = "*"
 
 [dev-packages]
+sphinx = "*"
+flake8 = "*"
 
 [requires]
 python_version = "3.8"
