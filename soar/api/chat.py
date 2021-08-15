@@ -1,74 +1,69 @@
-from sanic import response, Blueprint
-import asyncio
 import time
-import hashlib
-from . import middleware
+
+from sanic import response, Blueprint
+
+from .middleware import Middleware
 
 
-server = None
+class Chat:
+    def __init__(self, app):
+        self.app = app
+        self.middleware = Middleware(self.app)
+        self.setup()
 
-def setup(app):
-    global server
-    server = app
+    def setup(self):
+        bp = Blueprint("chatapi", url_prefix="/api/chat")
 
-    bp = Blueprint("chatapi", url_prefix="/api/chat")
+        bp.middleware(self.middleware.get_chat, 'request')
 
-    bp.middleware(middleware.chat, 'request')
+        bp.add_route(self.get_chat, "/hist")
+        bp.add_route(self.chat_send_msg, "/send")
+        self.app.blueprint(bp)
 
-    bp.add_route(getchat, "/hist")
-    bp.add_route(chat_send_msg, "/send")
+    async def get_chat(self, request):
+        data = request.json
 
-    app.blueprint(bp)
+        if "slice" not in data:
+            return response.json({"error": "message slice not found"})
+        if data["slice"] > 100:
+            return response.json({"error": "too many messages"})
 
-
-async def getchat(request):
-    user = request.ctx.auth
-    data = request.json
-
-    if "slice" not in data:
-        return response.json({"error": "message slice not found"})
-    if data["slice"] > 100:
-        return response.json({"error": "too many messages"})
-
-    messages = server.ctx.messages.find({
+        messages = self.app.db["messages"].find({
             "channel-tag": data["channel"]
-    }).sort("timestamp", 1)
+        }).sort("timestamp", 1)
 
-    messages = await messages.to_list(length=data["slice"])
+        messages = await messages.to_list(length=data["slice"])
 
-    sending = []
+        sending = []
 
-    for message in messages:
-        sending.append({k:v for k, v in message.items() if k != "_id"})
+        for message in messages:
+            sending.append({k: v for k, v in message.items() if k != "_id"})
 
-    return response.json({
-        "messages": sending
-    })
+        return response.json({
+            "messages": sending
+        })
 
+    async def add_message(self, channel_tag, user, content):
+        json = {
+            "channel-tag": channel_tag,
+            "sender": user,
+            "timestamp": time.time(),
+            "content": content
+        }
+        await self.app.ctx.db["messages"].insert_one({**json})
+        return json
 
-async def add_message(channel_tag, user, content):
-    json = {
-        "channel-tag": channel_tag,
-        "sender": user,
-        "timestamp": time.time(),
-        "content": content
-    }
-    await server.ctx.messages.insert_one({**json})
-    return json
+    async def chat_send_msg(self, request):
+        user = request.ctx.auth
+        data = request.json
 
+        channel = await self.app.ctx.db["channels"].find_one({
+            "message-tag": data["channel"]
+        })
 
-async def chat_send_msg(request):
-    user = request.ctx.auth
-    data = request.json
+        if channel["scope"] == "personal" and channel["creator"] != user:
+            return response.json({"error": "permission denied"})
 
-    channel = await server.ctx.channels.find_one({
-        "message-tag": data["channel"]
-    })
+        msg = await self.add_message(data["channel"], user, str(data.get("content")))
 
-    if channel["scope"] == "personal" and channel["creator"] != user:
-        return response.json({"error": "permission denied"})
-
-    msg = await add_message(data["channel"], user, str(data.get("content")))
-
-    return response.json(msg)
-
+        return response.json(msg)

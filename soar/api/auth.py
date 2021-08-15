@@ -2,57 +2,54 @@ from sanic import response, Blueprint
 import asyncio
 import hashlib
 import time
-from . import middleware
+from .middleware import Middleware
 
 
-server = None
+class Auth:
+    def __init__(self, app):
+        self.app = app
+        self.middleware = Middleware(app)
+        self.setup()
 
-def setup(app):
-    global server
-    server = app
+    def setup(self):
+        bp = Blueprint("authapi", url_prefix="/api/auth")
 
-    bp = Blueprint("authapi", url_prefix="/api/auth")
+        bp.middleware(self.middleware.check_auth, 'request')
 
-    bp.middleware(middleware.auth, 'request')
+        bp.add_route(register, '/register')
+        bp.add_route(login, '/login')
 
-    bp.add_route(register, '/register')
-    bp.add_route(login, '/login')
+        self.app.blueprint(bp)
 
-    app.blueprint(bp)
+    async def register(self, request):
+        data = request.json
 
+        count = await users.count_documents({"username": data["un"]})
 
-async def register(request):
-    data = request.json
-    users = server.ctx.users
+        if count > 0:
+            return response.json({"error": "Username taken"})
 
-    count = await users.count_documents({"username": data["un"]})
+        await users.insert_one({
+            "username": data["un"],
+            "password": hashlib.sha256(data["pw"].encode("utf-8")).hexdigest(),
+            "created-at": time.time(),
+            "friends": [],
+            "friend-reqs": []  # Inbound
+        })
 
-    if count > 0:
-        return response.json({"error": "Username taken"})
+        request.ctx.auth = data["un"]
 
-    await users.insert_one({
-        "username": data["un"],
-        "password": hashlib.sha256(data["pw"].encode("utf-8")).hexdigest(),
-        "created-at": time.time(),
-        "friends": [],
-        "friend-reqs": []  # Inbound
-    })
+        return response.json({"un": data["un"]})
 
-    request.ctx.auth = data["un"]
+    async def login(self, request):
+        data = request.json
+        users = self.app.ctx["users"]
 
-    return response.json({"un": data["un"]})
+        await asyncio.sleep(0.1)
 
+        if hashlib.sha256(data["pw"].encode("utf-8")).hexdigest() != (await users.find_one({"username": data["un"]}))["password"]:
+            return response.json({"error": "incorrect password"})
 
-async def login(request):
-    data = request.json
-    users = server.ctx.users
+        request.ctx.auth = data["un"]
 
-    await asyncio.sleep(0.1)
-
-    if hashlib.sha256(data["pw"].encode("utf-8")).hexdigest() != (await users.find_one({"username": data["un"]}))["password"]:
-        return response.json({"error": "incorrect password"})
-
-    request.ctx.auth = data["un"]
-
-    return response.json({"un": data["un"]})
-    
+        return response.json({"un": data["un"]})
