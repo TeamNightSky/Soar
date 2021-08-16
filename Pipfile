@@ -9,13 +9,12 @@ jinja2 = "*"
 motor = "*"
 dnspython = "*"
 toml = "*"
-pyngrok = "*"
-sphinx = "*"
 sanic_limiter = "*"
 
 [dev-packages]
 sphinx = "*"
 flake8 = "*"
+pyngrok = "*"
 
 [requires]
 python_version = "3.8"
