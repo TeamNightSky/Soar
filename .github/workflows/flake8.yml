@@ -8,7 +8,7 @@ on:
       - master
     types:
       - opened
-      - synchronized
+      - synchronize
 
 
 jobs:
