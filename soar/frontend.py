@@ -1,8 +1,6 @@
 import toml
-from sanic import response, Blueprint
-from sanic.response import html
 from jinja2 import Environment, FileSystemLoader, select_autoescape
-
+from sanic.response import html
 
 env = Environment(
     loader=FileSystemLoader('soar/templates'),

@@ -1,6 +1,5 @@
 from sanic import Sanic
-from .db import SoarDB
-from soar import api, frontend
+from soar import api, frontend, db
 
 
 app = Sanic('Soar')
@@ -10,7 +9,7 @@ app.static('/static', './soar/static/')
 
 @app.listener('before_server_start')
 def init(sanic, loop):
-    sanic.ctx.db = SoarDB()
+    sanic.ctx.db = db.SoarDB()
     sanic.router.reset()
 
     # Setup API components
@@ -28,4 +27,3 @@ app.config.WEBSOCKET_READ_LIMIT = 2 ** 16
 app.config.WEBSOCKET_WRITE_LIMIT = 2 ** 16
 app.config.WEBSOCKET_PING_INTERVAL = 2
 app.config.WEBSOCKET_PING_TIMEOUT = 6
-

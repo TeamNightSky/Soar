@@ -1,8 +1,9 @@
-from sanic import response, Blueprint
-from sanic_limiter import Limiter, get_remote_address
 import asyncio
 import hashlib
 import time
+
+from sanic import response, Blueprint
+
 from .middleware import Middleware
 
 
