@@ -1,8 +1,9 @@
 from sanic import Sanic
 from .db import SoarDB
-from .api import Auth, Channels, Chat
+from soar import api, frontend
 
-app = Sanic("Soar")
+
+app = Sanic('Soar')
 
 app.static('/static', './soar/static/')
 
@@ -10,10 +11,13 @@ app.static('/static', './soar/static/')
 @app.listener('before_server_start')
 def init(sanic, loop):
     sanic.ctx.db = SoarDB()
+    sanic.router.reset()
 
-    Auth.setup(sanic)
-    Chat.setup(sanic)
-    Channels.setup(sanic)
+    # Setup API components
+    api.setup(sanic)
+    frontend.setup(sanic)
+
+    sanic.router.finalize()
 
 
 app.websocket_enabled = True

@@ -13,9 +13,10 @@ env = Environment(
 with open('config.toml') as f:
     config = toml.load(f)
 
+
 async def template(tpl, **kwargs):
-    template = env.get_template(tpl)
-    content = await template.render_async(kwargs)
+    new_template = env.get_template(tpl)
+    content = await new_template.render_async(kwargs)
     return html(content)
 
 

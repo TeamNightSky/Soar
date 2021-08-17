@@ -9,14 +9,10 @@ class Chat:
     @staticmethod
     def setup(app):
         Chat.app = app
-        Chat.middleware = Middleware(app)
-        Chat.setup()
 
-    @staticmethod
-    def setup():
         bp = Blueprint("chatapi", url_prefix="/api/chat")
 
-        bp.middleware(Chat.middleware.get_chat, 'request')
+        bp.middleware(Middleware.get_chat, 'request')
 
         bp.add_route(Chat.get_chat, "/hist")
         bp.add_route(Chat.chat_send_msg, "/send")

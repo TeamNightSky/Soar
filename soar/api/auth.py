@@ -10,14 +10,10 @@ class Auth:
     @staticmethod
     def setup(app):
         Auth.app = app
-        Auth.middleware = Middleware(app)
-        Auth.create_blueprint()
 
-    @staticmethod
-    def create_blueprint():
         bp = Blueprint(name="authapi", url_prefix="/api/auth")
 
-        bp.middleware(Auth.middleware.check_auth, 'request')
+        bp.middleware(Middleware.check_auth, 'request')
 
         bp.add_route(Auth.register, '/register')
         bp.add_route(Auth.login, '/login')
