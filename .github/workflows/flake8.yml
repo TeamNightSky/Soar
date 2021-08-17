@@ -4,8 +4,6 @@ on:
   pull_request_target:
     paths:
       - '*.py'
-    branches:
-      - master
     types:
       - opened
       - synchronize
@@ -13,12 +11,14 @@ on:
   pull_request:
     paths:
       - '*.py'
-    branches:
-      - master
     types:
       - opened
       - synchronize
-
+  push:
+    paths:
+      - '*.py'
+    branches:
+      - master
 
 jobs:
   flake8_py3:
