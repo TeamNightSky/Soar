@@ -1,6 +1,5 @@
 from sanic import Sanic
-from .db import SoarDB
-from soar import api, frontend
+from soar import api, frontend, db
 
 
 app = Sanic('Soar')
@@ -10,7 +9,7 @@ app.static('/static', './soar/static/')
 
 @app.listener('before_server_start')
 def init(sanic, loop):
-    sanic.ctx.db = SoarDB()
+    sanic.ctx.db = db.SoarDB()
     sanic.router.reset()
 
     # Setup API components
