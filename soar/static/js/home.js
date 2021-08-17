@@ -1,7 +1,7 @@
 /*!
  * Webflow: Front-end site library
  * @license MIT
- * Inline scripts may access the api using an async handler:
+ * Inline scripts may access the backend using an async handler:
  *   var Webflow = Webflow || [];
  *   Webflow.push(readyFunction);
  */
@@ -335,7 +335,7 @@ function eventProxy(target, types) {
   };
 
   return proxy;
-} // Webflow.location - Wrap window.location in api
+} // Webflow.location - Wrap window.location in backend
 
 
 Webflow.location = function (url) {

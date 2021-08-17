@@ -21,6 +21,9 @@ class Middleware:
     async def check_auth(request):
         """Channels, Auth"""
         data = process_request(request)
+        if not isinstance(data, dict):
+            return data
+
         if "pw" not in data:
             return response.json({"error": "Password not included"})
         elif "un" not in data:
@@ -41,6 +44,8 @@ class Middleware:
     async def get_chat(request):
         """Chat.get_chat"""
         data = process_request(request)
+        if not isinstance(data, dict):
+            return data
 
         if not hasattr(request.ctx, "auth"):
             if err := Middleware.check_auth(request):
