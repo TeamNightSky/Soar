@@ -1,5 +1,5 @@
 from sanic import Sanic
-from soar import api, frontend, db
+from soar import backend, frontend, db
 
 
 app = Sanic('Soar')
@@ -12,8 +12,7 @@ def init(sanic, loop):
     sanic.ctx.db = db.SoarDB()
     sanic.router.reset()
 
-    # Setup API components
-    api.setup(sanic)
+    backend.setup(sanic)
     frontend.setup(sanic)
 
     sanic.router.finalize()
