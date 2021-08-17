@@ -13,10 +13,12 @@ def process_request(request):
 
 
 class Middleware:
-    def __init__(self, app):
-        self.app = app
+    @staticmethod
+    def setup(app):
+        Middleware.app = app
 
-    async def check_auth(self, request):
+    @staticmethod
+    async def check_auth(request):
         """Channels, Auth"""
         data = process_request(request)
         if "pw" not in data:
@@ -29,18 +31,19 @@ class Middleware:
             return response.json({"error": "Invalid password"})
 
         given = hashlib.sha256(data["pw"].encode("utf-8")).hexdigest()
-        correct = (await self.app.ctx.db["users"].find_one({"username": data["un"]}))["password"]
+        correct = (await Middleware.app.ctx.db["users"].find_one({"username": data["un"]}))["password"]
 
         if given != correct:
             return response.json({"error": "incorrect password"})
         request.ctx.auth = data["un"]
 
-    async def get_chat(self, request):
+    @staticmethod
+    async def get_chat(request):
         """Chat.get_chat"""
         data = process_request(request)
 
         if not hasattr(request.ctx, "auth"):
-            if err := self.check_auth(request):
+            if err := Middleware.check_auth(request):
                 return err
         user = request.ctx.auth
 
@@ -48,12 +51,12 @@ class Middleware:
             return response.json({"error": "channel not included"})
         elif not min([c in safe_chars for c in data["channel"]]):
             return response.json({"error": "Invalid channel name"})
-        elif (await self.app.ctx.db["channels"].count_documents({
+        elif (await Middleware.app.ctx.db["channels"].count_documents({
             "message-tag": data["channel"]
         })) < 1:
             return response.json({"error": "channel not found"})
 
-        channel = await self.app.ctx.db["channels"].find_one({
+        channel = await Middleware.app.ctx.db["channels"].find_one({
             "message-tag": data["channel"]
         })
 

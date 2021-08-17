@@ -15,6 +15,3 @@ sanic_limiter = "*"
 sphinx = "*"
 flake8 = "*"
 pyngrok = "*"
-
-[requires]
-python_version = "3.8"
