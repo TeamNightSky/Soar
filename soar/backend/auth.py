@@ -19,6 +19,8 @@ class Auth:
         bp.add_route(Auth.register, '/register')
         bp.add_route(Auth.login, '/login')
 
+        Auth.app.ctx.limiter.limit("20 per minute")(bp)
+
         Auth.app.blueprint(bp)
 
     @staticmethod

@@ -14,7 +14,7 @@ class Channels:
         bp = Blueprint("channelsapi", url_prefix="/api/channels")
         bp.middleware(Middleware.check_auth, "request")
 
-        bp.add_route(Channels.create, "/create")
+        bp.add_route(Channels.app.ctx.limiter.limit("1 per second")(Channels.create), "/create")
         app.blueprint(bp)
 
     @staticmethod
