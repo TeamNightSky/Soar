@@ -27,4 +27,3 @@ app.config.WEBSOCKET_READ_LIMIT = 2 ** 16
 app.config.WEBSOCKET_WRITE_LIMIT = 2 ** 16
 app.config.WEBSOCKET_PING_INTERVAL = 2
 app.config.WEBSOCKET_PING_TIMEOUT = 6
-
