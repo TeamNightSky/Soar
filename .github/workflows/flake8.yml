@@ -9,6 +9,15 @@ on:
     types:
       - opened
       - synchronize
+  
+  pull_request:
+    paths:
+      - '*.py'
+    branches:
+      - master
+    types:
+      - opened
+      - synchronize
 
 
 jobs:
