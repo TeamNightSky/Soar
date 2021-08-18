@@ -1,5 +1,5 @@
 from sanic import Sanic
-from soar import backend, frontend, db
+from soar import backend, frontend, models
 from sanic_limiter import Limiter, get_remote_address
 
 
@@ -10,11 +10,11 @@ app.static('/static', './soar/static/')
 
 @app.listener('before_server_start')
 def init(sanic, loop):
-    sanic.ctx.db = db.SoarDB().db
     sanic.router.reset()
 
     sanic.ctx.limiter = Limiter(app, global_limits=[], key_func=get_remote_address)
 
+    models.setup(sanic)
     backend.setup(sanic)
     frontend.setup(sanic)
 
