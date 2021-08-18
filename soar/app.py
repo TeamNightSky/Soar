@@ -5,7 +5,7 @@ from sanic_limiter import Limiter, get_remote_address
 
 app = Sanic('Soar')
 
-app.static('/static', './soar/static/')
+app.static('/static', './static/')
 
 
 @app.listener('before_server_start')
