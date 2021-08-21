@@ -1,3 +1,7 @@
+import hashlib
+from ..snowflakes import user_snowflake
+
+
 class Model:
     def __init__(self, client, database_target=None, snowflake=None):
         self.client = client
@@ -18,6 +22,7 @@ class Model:
                 {"_id": self._id},
                 self.data
             )
+        self.data = {"_id": self._id}
 
     async def reload(self):
         if self._id:
@@ -30,8 +35,10 @@ class Model:
             await self.client[self.target].clear()
 
     async def exists(self):
-        # TODO: Write out if an entry is in self.client[self.target]
-        pass
+        if self._id:
+            count = await self.client[self.target].count_documents({"_id": self._id})
+            return bool(count)
+
 
 """yaml
 users:
@@ -72,15 +79,20 @@ creations:
 
 class User(Model):
     # Subject to change
-    def __init__(self, client, stuff, foo, bar):
-        snowflake = get_snowflake(stuff, foo, bar)
+    def __init__(self, client, username, password, time):
+        snowflake = user_snowflake(username, time)
+        self.username, self.password, self.time = username, password, time
         super().__init__(client, 'users', snowflake)
 
     async def setup(self):
         if not await self.exists():
             self.data.update({
-                'name': None,
-
+                "username": self.username,
+                "password": hashlib.sha256(self.password.encode("utf-8")).hexdigest(),
+                "created-at": self.time,
+                "friends": [],
+                "friend-reqs": [],  # Inbound
+                "logins": []
             })
             await self.save()
         else:
@@ -92,11 +104,13 @@ class Creation(Model):
 
 
 class Board(Model):
-    pass
+    async def add_message(self, channel_tag, user, content, time):
+        json = {
+            "channel-tag": channel_tag,
+            "sender": user,
+            "timestamp": time,
+            "content": content
+        }
+        await self.client[self.target]["messages"].insert_one({**json})
+        return json
 
-
-class Message:
-    # I hesitate to write this class because messages aren't stored in their own database.
-    # They are stored inside boards meaning that self.target probably wouldn't work
-    # Subclass maybe?
-    pass

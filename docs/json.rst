@@ -14,7 +14,8 @@ User
         "password": sha256 hex digest,
         "created-at": time,
         "friends": list of usernames,
-        "friend-reqs": inbound friend requests
+        "friend-reqs": inbound friend requests,
+        "logins": list of logins
     }
 
 

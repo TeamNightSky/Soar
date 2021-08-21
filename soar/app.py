@@ -1,5 +1,5 @@
 from sanic import Sanic
-from soar import backend, frontend, models
+from soar import models, routes
 from sanic_limiter import Limiter, get_remote_address
 
 
@@ -15,8 +15,7 @@ def init(sanic, loop):
     sanic.ctx.limiter = Limiter(app, global_limits=[], key_func=get_remote_address)
 
     models.setup(sanic)
-    backend.setup(sanic)
-    frontend.setup(sanic)
+    routes.frontend.setup(sanic)
 
     sanic.router.finalize()
 
