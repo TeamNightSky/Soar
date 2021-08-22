@@ -6,7 +6,11 @@ from .model import Model
 
 class User(Model):
     DEFAULT_DATA = {
-
+        "name": "",
+        "creations": [],
+        "friends": [],
+        "logins": [],
+        "online": False
     }
 
     def __init__(self, client, username, password, time):

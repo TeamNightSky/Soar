@@ -3,7 +3,10 @@ from .model import Model
 
 class Board(Model):
     DEFAULT_DATA = {
-
+        "title": "",
+        "author": None,
+        "attachments": [],
+        "created-at": None
     }
 
     async def add_message(self, channel_tag, user, content, time):
