@@ -15,7 +15,6 @@ def init(sanic, loop):
     sanic.ctx.limiter = Limiter(app, global_limits=[], key_func=get_remote_address)
 
     models.setup(sanic)
-    routes.frontend.setup(sanic)
 
     sanic.router.finalize()
 
