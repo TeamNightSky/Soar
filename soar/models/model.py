@@ -3,14 +3,13 @@ class Model:
 
     def __init__(self, client, database_target=None, snowflake=None):
         self.collection = client.get_collection(database_target)
-        self.data = {
-            '_id': snowflake
-        }
-        self.data.update(self.DEFAULT_DATA)
+        self._id = snowflake
 
-    @property
-    def _id(self):
-        return self.data.get('_id', None)
+        self.data = {
+            "_id": self._id
+        }
+
+        self.data.update(self.DEFAULT_DATA)
 
     async def save(self):
         if not self._id:
@@ -20,11 +19,9 @@ class Model:
                 {"_id": self._id},
                 self.data
             )
-        del self.data
-        self.data = {"_id": self._id}
 
     async def reload(self):
-        if self._id:
+        if self._id and await self.exists():
             new_data = await self.collection.find_one({"_id": self._id})
             self.data.update(new_data)
 
@@ -37,3 +34,11 @@ class Model:
         if self._id:
             count = await self.collection.count_documents({"_id": self._id})
             return bool(count)
+
+    async def __aenter__(self):
+        await self.reload()
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        del self.data
+        self.data = {'_id': self._id}

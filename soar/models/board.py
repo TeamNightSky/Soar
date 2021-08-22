@@ -1,4 +1,5 @@
 from .model import Model
+from ..snowflakes import board_snowflake
 
 
 class Board(Model):
@@ -8,6 +9,10 @@ class Board(Model):
         "attachments": [],
         "created-at": None
     }
+
+    def __init__(self, client, title, owner, time):
+        snowflake = board_snowflake(title, owner, time)
+        super().__init__(client, "boards", snowflake)
 
     async def add_message(self, channel_tag, user, content, time):
         json = {
