@@ -1,19 +1,12 @@
 
 class BackendClass:
-    def __init__(self, app, debug=False):
+    def __init__(self, ctx, debug=False):
         self.debug = debug
         if self.debug:
-            print(f"Initiating {self.__class__.__name__} backend class.")
-        self.app = app
-        self.db = app.ctx.db.db
-        self.modules = {}
+            print(f"Initiating backend:{self.__class__.__name__}")
 
-    def link(self, modules):
-        self.modules = {}
-        for module in modules:
-            self.modules[module.__class__.__name__] = module
-        if self.debug:
-            print(f"{self.__class__.__name__} has been linked to {len(modules)} other backend classes.")
+        self.ctx = ctx
+        self.db = ctx.db.db
 
 
 class Error(Exception):

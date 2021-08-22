@@ -1,6 +1,5 @@
 from motor import motor_asyncio
 import os
-from .model import User, Board, Creation
 
 
 class SoarDB:
@@ -15,10 +14,6 @@ class SoarDB:
             "?retryWrites=true&w=majority"
         )
 
-        self.user = User
-        self.board = Board
-        self.creation = Creation
-
     @property
     def _users(self):
         return self.client['users']
@@ -30,3 +25,6 @@ class SoarDB:
     @property
     def _boards(self):
         return self.client['boards']
+
+    def get_collection(self, collection):
+        return self.client[collection]

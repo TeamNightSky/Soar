@@ -1,6 +1,10 @@
 
-def channel_snowflake(name, creator, time):
-    return str(int(time)) + str(int(name) + int(creator))[:10]
+def board_snowflake(title, owner, time):
+    return str(int(time)) + str(int(title) + int(owner))[:10]
+
+
+def creation_snowflake(title, author, time):
+    return str(int(time)) + str(int(title) + int(author))[:10]
 
 
 def user_snowflake(username, time):
