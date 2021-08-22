@@ -1,6 +1,8 @@
 from .db import SoarDB
-from .model import User, Creation, Board
+from .user import User
+from .creation import Creation
+from .board import Board
 
 
-def setup(app):
-    app.ctx.db = SoarDB()
+def setup(ctx):
+    ctx.db = SoarDB()
